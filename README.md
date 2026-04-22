@@ -12,6 +12,11 @@ An automated Natural Language Processing (NLP) tool that screens PDF resumes aga
 * **Language:** Python
 * **Libraries:** `pypdf` (v6.10.2, Document Parsing), `scikit-learn` (v1.8.0, Machine Learning / NLP), `fpdf2` (PDF Generation)
 
+## Database Setup
+
+1. **Run the Schema**: Execute the SQL commands in `database/schema.sql` to create the MySQL database and the required table.
+2. **Update Database Configuration**: Open `app.py` and locate the `db_config` dictionary under the `--- DATABASE CONFIGURATION ---` section. Update the credentials with your actual MySQL configuration.
+
 ## Expected Demo Output
 
 By running this project against our mock resumes, you can expect the following match scores:
