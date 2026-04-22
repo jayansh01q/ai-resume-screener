@@ -1,10 +1,39 @@
 import streamlit as st
+import mysql.connector
 from pypdf import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# --- DATABASE CONFIGURATION ---
+# Replace 'your_password_here' with the actual password you set in MySQL
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'your_password_here',
+    'database': 'resume_db'
+}
+
+def save_to_database(name, job, score):
+    """Saves the analysis result into the MySQL table."""
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        
+        query = "INSERT INTO candidate_scores (candidate_name, job_title, match_score) VALUES (%s, %s, %s)"
+        values = (name, job, score)
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        st.error(f"Database Error: {e}")
+        return False
+
+# --- CORE LOGIC ---
 def extract_text_from_pdf(file):
-    """Reads an uploaded PDF file and extracts text."""
     try:
         text = ""
         reader = PdfReader(file)
@@ -12,10 +41,9 @@ def extract_text_from_pdf(file):
             text += page.extract_text()
         return text
     except Exception as e:
-        return f"Error extracting text: {e}"
+        return f"Error: {e}"
 
 def calculate_match_score(resume_text, job_description):
-    """Calculates TF-IDF cosine similarity."""
     documents = [resume_text, job_description]
     vectorizer = TfidfVectorizer(stop_words='english')
     tfidf_matrix = vectorizer.fit_transform(documents)
@@ -23,44 +51,39 @@ def calculate_match_score(resume_text, job_description):
     return round(match_score * 100, 2)
 
 # --- STREAMLIT UI ---
-st.set_page_config(page_title="AI Resume Screener", page_icon="📄")
+st.set_page_config(page_title="AI Resume Screener Pro", page_icon="🚀")
 
-st.title("📄 AI Resume Screener")
-st.write("Upload a candidate's resume and paste the job description to calculate their mathematical match score.")
+st.title("🚀 AI Resume Screener + MySQL")
+st.write("This version automatically saves all analysis results to your local database.")
 
-# 1. Job Description Input
-st.subheader("1. Job Requirements")
-job_desc = st.text_area("Paste the Job Description here:", height=150)
+# 1. Inputs
+job_desc = st.text_area("1. Paste Job Description:", height=100)
+candidate_name = st.text_input("2. Candidate Full Name (for database):")
+uploaded_file = st.file_uploader("3. Upload PDF Resume", type="pdf")
 
-# 2. Resume Uploader
-st.subheader("2. Candidate Resume")
-uploaded_file = st.file_uploader("Upload PDF Resume", type="pdf")
-
-# 3. Execution Button
-if st.button("Calculate Match Score"):
-    if not job_desc.strip():
-        st.warning("Please paste a job description first.")
-    elif uploaded_file is None:
-        st.warning("Please upload a PDF resume.")
+# 2. Execution
+if st.button("Analyze & Save to DB"):
+    if not job_desc or not candidate_name or not uploaded_file:
+        st.warning("Please fill out all fields and upload a resume.")
     else:
-        with st.spinner("Analyzing document vectors..."):
-            # Extract text
+        with st.spinner("Processing..."):
             resume_content = extract_text_from_pdf(uploaded_file)
             
-            if resume_content.startswith("Error"):
-                st.error(resume_content)
-            else:
-                # Calculate Score
+            if "Error" not in resume_content:
                 score = calculate_match_score(resume_content, job_desc)
+                
+                # Try to save to MySQL
+                db_success = save_to_database(candidate_name, job_desc[:100] + "...", score)
                 
                 # Display Results
                 st.markdown("---")
-                st.subheader("Analysis Complete")
-                
-                # Dynamic visual feedback based on realistic ATS thresholds
-                if score >= 15:
-                    st.success(f"**Match Score: {score}%** - Highly relevant candidate. Move to interview stage.")
-                elif score >= 5:
-                    st.info(f"**Match Score: {score}%** - Potential match. Requires manual review.")
+                if db_success:
+                    st.success(f"**Analysis Saved!** Candidate: {candidate_name} | Score: {score}%")
                 else:
-                    st.error(f"**Match Score: {score}%** - Low match. Likely not a fit for this role.")
+                    st.warning(f"Analysis calculated ({score}%), but failed to save to database.")
+                
+                if score >= 15:
+                    st.balloons()
+                    st.info("Status: Highly Recommended")
+            else:
+                st.error(resume_content)
