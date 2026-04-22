@@ -1,4 +1,10 @@
+# Credentials and Secrets
+.env
+*.pem
+*.cert
+*.key
+
+# Python fluff
 __pycache__/
 *.pyc
-.env
-.vscode/
+.streamlit/secrets.toml
