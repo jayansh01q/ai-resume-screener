@@ -17,19 +17,65 @@ and an interactive analytics dashboard to visualize the results.
 # 'sklearn' (scikit-learn) provides the machine learning tools:
 #   - TfidfVectorizer: converts text into numerical vectors based on word importance.
 #   - cosine_similarity: calculates how similar two text vectors are (giving us the match score).
+import os
+from dotenv import load_dotenv
 import streamlit as st
 import mysql.connector
+
+# This line is the "magic" that finds your .env file 
+# and makes its contents available to Python.
+load_dotenv()
 from pypdf import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# --- 1. AUTHENTICATION LOGIC ---
+def check_password():
+    """Returns True if the user has the correct password."""
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == "admin123": # <--- SET YOUR PASSWORD HERE
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store the password in state
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input for password.
+        st.title("🔒 Recruiter Portal Login")
+        st.text_input(
+            "Please enter the access code to proceed:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+            st.error("😕 Password incorrect. Please try again.")
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password not correct, show input + error.
+        st.title("🔒 Recruiter Portal Login")
+        st.text_input(
+            "Please enter the access code to proceed:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        st.error("😕 Password incorrect. Please try again.")
+        return False
+    else:
+        # Password correct.
+        return True
+
 # --- DATABASE CONFIGURATION ---
-# Replace 'your_password_here' with the actual password you set in MySQL
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'root',
-    'database': 'resume_db'
+    'host': os.getenv("MYSQL_HOST"),
+    'user': os.getenv("MYSQL_USER"),
+    'password': os.getenv("MYSQL_PASSWORD"),
+    'database': os.getenv("MYSQL_DB"),
+    'port': int(os.getenv("MYSQL_PORT", 16333)), # Port must be an integer
+    'ssl_ca': 'ca.pem'  # Path to the certificate you downloaded
 }
 
 def save_to_database(name, job, score):
@@ -69,93 +115,95 @@ def calculate_match_score(resume_text, job_description):
     match_score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
     return round(match_score * 100, 2)
 
-# --- STREAMLIT UI ---
-st.set_page_config(page_title="AI Resume Screener Pro", page_icon="🚀")
+# Check password before showing anything else
+if check_password():
+    # --- STREAMLIT UI ---
+    st.set_page_config(page_title="AI Resume Screener Pro", page_icon="🚀")
 
-st.title("🚀 AI Resume Screener + MySQL")
-st.write("This version automatically saves all analysis results to your local database.")
+    st.title("🚀 AI Resume Screener + MySQL")
+    st.write("This version automatically saves all analysis results to your local database.")
 
-# 1. Inputs
-job_desc = st.text_area("1. Paste Job Description:", height=100)
-candidate_name = st.text_input("2. Candidate Full Name (for database):")
-uploaded_file = st.file_uploader("3. Upload PDF Resume", type="pdf")
+    # 1. Inputs
+    job_desc = st.text_area("1. Paste Job Description:", height=100)
+    candidate_name = st.text_input("2. Candidate Full Name (for database):")
+    uploaded_file = st.file_uploader("3. Upload PDF Resume", type="pdf")
 
-# 2. Execution
-if st.button("Analyze & Save to DB"):
-    if not job_desc or not candidate_name or not uploaded_file:
-        st.warning("Please fill out all fields and upload a resume.")
-    else:
-        with st.spinner("Processing..."):
-            resume_content = extract_text_from_pdf(uploaded_file)
-            
-            if "Error" not in resume_content:
-                score = calculate_match_score(resume_content, job_desc)
-                
-                # Try to save to MySQL
-                db_success = save_to_database(candidate_name, job_desc[:100] + "...", score)
-                
-                # Display Results
-                st.markdown("---")
-                if db_success:
-                    st.success(f"**Analysis Saved!** Candidate: {candidate_name} | Score: {score}%")
-                else:
-                    st.warning(f"Analysis calculated ({score}%), but failed to save to database.")
-                
-                if score >= 15:
-                    st.balloons()
-                    st.info("Status: Highly Recommended")
-            else:
-                st.error(resume_content)
-
-# --- ANALYTICS DASHBOARD ---
-# The following imports and function power the analytics dashboard below.
-# 'pandas' is used to load data from our MySQL database into a structured DataFrame,
-# which makes it easy to manipulate and pass to visualization libraries.
-# 'plotly.express' is used to generate interactive, visually appealing charts 
-# based on that DataFrame (like the score distribution histogram).
-import pandas as pd
-import plotly.express as px
-
-def show_analytics():
-    st.markdown("---")
-    st.header("📊 Recruitment Analytics Dashboard")
-    
-    try:
-        # 1. Fetch data from MySQL
-        conn = mysql.connector.connect(**db_config)
-        query = "SELECT candidate_name, match_score, analysis_date FROM candidate_scores"
-        df = pd.read_sql(query, conn)
-        conn.close()
-
-        if not df.empty:
-            # 2. Create the Plotly Chart
-            fig = px.bar(
-                df, 
-                x="candidate_name", 
-                y="match_score",
-                title="Candidate Comparison",
-                labels={'match_score': 'Match Score (%)', 'candidate_name': 'Candidate'},
-                color="match_score",
-                color_continuous_scale="Viridis" # This adds a cool color gradient!
-            )
-            
-            # 3. Display stats and chart
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Total Resumes Scanned", len(df))
-            with col2:
-                st.metric("Average Match Score", f"{round(df['match_score'].mean(), 2)}%")
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # 4. Show raw data table (optional but pro)
-            with st.expander("View Raw Database Records"):
-                st.dataframe(df.sort_values(by="analysis_date", ascending=False))
+    # 2. Execution
+    if st.button("Analyze & Save to DB"):
+        if not job_desc or not candidate_name or not uploaded_file:
+            st.warning("Please fill out all fields and upload a resume.")
         else:
-            st.info("No data found in the database yet. Run an analysis to see the dashboard!")
-            
-    except Exception as e:
-        st.error(f"Could not load dashboard: {e}")
+            with st.spinner("Processing..."):
+                resume_content = extract_text_from_pdf(uploaded_file)
 
-# Call the function at the very end of your script
-show_analytics()
+                if "Error" not in resume_content:
+                    score = calculate_match_score(resume_content, job_desc)
+
+                    # Try to save to MySQL
+                    db_success = save_to_database(candidate_name, job_desc[:100] + "...", score)
+
+                    # Display Results
+                    st.markdown("---")
+                    if db_success:
+                        st.success(f"**Analysis Saved!** Candidate: {candidate_name} | Score: {score}%")
+                    else:
+                        st.warning(f"Analysis calculated ({score}%), but failed to save to database.")
+
+                    if score >= 15:
+                        st.balloons()
+                        st.info("Status: Highly Recommended")
+                else:
+                    st.error(resume_content)
+
+    # --- ANALYTICS DASHBOARD ---
+    # The following imports and function power the analytics dashboard below.
+    # 'pandas' is used to load data from our MySQL database into a structured DataFrame,
+    # which makes it easy to manipulate and pass to visualization libraries.
+    # 'plotly.express' is used to generate interactive, visually appealing charts 
+    # based on that DataFrame (like the score distribution histogram).
+    import pandas as pd
+    import plotly.express as px
+
+    def show_analytics():
+        st.markdown("---")
+        st.header("📊 Recruitment Analytics Dashboard")
+
+        try:
+            # 1. Fetch data from MySQL
+            conn = mysql.connector.connect(**db_config)
+            query = "SELECT candidate_name, match_score, analysis_date FROM candidate_scores"
+            df = pd.read_sql(query, conn)
+            conn.close()
+
+            if not df.empty:
+                # 2. Create the Plotly Chart
+                fig = px.bar(
+                    df, 
+                    x="candidate_name", 
+                    y="match_score",
+                    title="Candidate Comparison",
+                    labels={'match_score': 'Match Score (%)', 'candidate_name': 'Candidate'},
+                    color="match_score",
+                    color_continuous_scale="Viridis" # This adds a cool color gradient!
+                )
+
+                # 3. Display stats and chart
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Resumes Scanned", len(df))
+                with col2:
+                    st.metric("Average Match Score", f"{round(df['match_score'].mean(), 2)}%")
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                # 4. Show raw data table (optional but pro)
+                with st.expander("View Raw Database Records"):
+                    st.dataframe(df.sort_values(by="analysis_date", ascending=False))
+            else:
+                st.info("No data found in the database yet. Run an analysis to see the dashboard!")
+
+        except Exception as e:
+            st.error(f"Could not load dashboard: {e}")
+
+    # Call the function at the very end of your script
+    show_analytics()
