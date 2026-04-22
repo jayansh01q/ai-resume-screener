@@ -63,3 +63,4 @@ By running this project against our mock resumes, you can expect the following m
 
 ## Development Methodology: AI-Assisted Architecture
 This project was built using an AI-assisted development workflow. I acted as the lead system architect, utilizing Large Language Models (like Claude 3.5 Sonnet and GPT-4o) to accelerate the prototyping and coding phase. My primary focus was on system design, library integration (`scikit-learn`, `pypdf`, `streamlit`), and tuning the mathematical thresholds to accurately reflect real-world ATS strictness.
+I utilized an AI-assisted architecture to bridge the gap between the NLP logic and data persistence. While the AI helped generate the `mysql-connector` boilerplates, I focused on designing the relational schema and ensuring the Python backend correctly sanitized inputs before committing to the MySQL instance.
