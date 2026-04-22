@@ -3,3 +3,5 @@ scikit-learn==1.8.0
 fpdf2
 streamlit
 mysql-connector-python
+plotly
+pandas
