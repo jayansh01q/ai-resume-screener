@@ -18,13 +18,14 @@ and an interactive analytics dashboard to visualize the results.
 #   - TfidfVectorizer: converts text into numerical vectors based on word importance.
 #   - cosine_similarity: calculates how similar two text vectors are (giving us the match score).
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
 import mysql.connector
 
-# This line is the "magic" that finds your .env file 
-# and makes its contents available to Python.
-load_dotenv()
+# This finds the directory where app.py is sitting
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path, override=True)
 from pypdf import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -75,7 +76,8 @@ db_config = {
     'password': os.getenv("MYSQL_PASSWORD"),
     'database': os.getenv("MYSQL_DB"),
     'port': int(os.getenv("MYSQL_PORT", 16333)), # Port must be an integer
-    'ssl_ca': 'ca.pem'  # Path to the certificate you downloaded
+    'ssl_ca': 'ca.pem',  # Path to the certificate you downloaded
+    'use_pure': True
 }
 
 def save_to_database(name, job, score):
