@@ -23,24 +23,36 @@ By running this project against our mock resumes, you can expect the following m
 ## How to Run Locally
 
 1. Clone the repository:
+   ~~~bash
    git clone https://github.com/jayansh01q/ai-resume-screener.git
+   ~~~
 
 2. Navigate into the directory:
+   ~~~bash
    cd ai-resume-screener
+   ~~~
 
 3. Install the required dependencies:
+   ~~~bash
    pip install -r requirements.txt
+   ~~~
 
 4. Generate the mock PDF resumes for testing:
+   ~~~bash
    python make_pdfs.py
+   ~~~
 
 * **Option A: Run the Web Interface (Recommended)**
   Launch the interactive Streamlit web application:
+  ~~~bash
   streamlit run app.py
-  
+  ~~~
+
 * **Option B: Run the Command Line Version**
   If you prefer the terminal, you can run the core script directly:
+  ~~~bash
   python main.py
+  ~~~
 
 ## Development Methodology: AI-Assisted Architecture
 This project was built using an AI-assisted development workflow. I acted as the lead system architect, utilizing Large Language Models (like Claude 3.5 Sonnet and GPT-4o) to accelerate the prototyping and coding phase. My primary focus was on system design, library integration (`scikit-learn`, `pypdf`, `streamlit`), and tuning the mathematical thresholds to accurately reflect real-world ATS strictness.
