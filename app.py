@@ -1,3 +1,22 @@
+"""
+=============================================================================
+TITLE: AI Resume Screener Pro
+=============================================================================
+This application is an AI-powered resume screening tool that helps recruiters
+and hiring managers quickly evaluate candidates. It extracts text from PDF
+resumes, compares it against a provided job description using natural
+language processing (TF-IDF and Cosine Similarity), and calculates a match
+score. It also features a MySQL database integration to save candidate scores
+and an interactive analytics dashboard to visualize the results.
+"""
+
+# --- CORE IMPORTS ---
+# 'streamlit' is used to build the interactive web user interface.
+# 'mysql.connector' allows the app to connect, read, and write to a local MySQL database.
+# 'pypdf' is used to read and extract text content from uploaded PDF resumes.
+# 'sklearn' (scikit-learn) provides the machine learning tools:
+#   - TfidfVectorizer: converts text into numerical vectors based on word importance.
+#   - cosine_similarity: calculates how similar two text vectors are (giving us the match score).
 import streamlit as st
 import mysql.connector
 from pypdf import PdfReader
@@ -87,3 +106,55 @@ if st.button("Analyze & Save to DB"):
                     st.info("Status: Highly Recommended")
             else:
                 st.error(resume_content)
+
+# --- ANALYTICS DASHBOARD ---
+# The following imports and function power the analytics dashboard below.
+# 'pandas' is used to load data from our MySQL database into a structured DataFrame,
+# which makes it easy to manipulate and pass to visualization libraries.
+# 'plotly.express' is used to generate interactive, visually appealing charts 
+# based on that DataFrame (like the score distribution histogram).
+import pandas as pd
+import plotly.express as px
+
+def show_analytics():
+    st.markdown("---")
+    st.header("📊 Recruitment Analytics Dashboard")
+    
+    try:
+        # 1. Fetch data from MySQL
+        conn = mysql.connector.connect(**db_config)
+        query = "SELECT candidate_name, match_score, analysis_date FROM candidate_scores"
+        df = pd.read_sql(query, conn)
+        conn.close()
+
+        if not df.empty:
+            # 2. Create the Plotly Chart
+            fig = px.histogram(
+                df, 
+                x="match_score", 
+                nbins=10,
+                title="Distribution of Candidate Match Scores",
+                labels={'match_score': 'Match Score (%)'},
+                color_discrete_sequence=['#00CC96']
+            )
+            
+            # 3. Display stats and chart
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Resumes Scanned", len(df))
+            with col2:
+                st.metric("Average Match Score", f"{round(df['match_score'].mean(), 2)}%")
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # 4. Show raw data table (optional but pro)
+            with st.expander("View Raw Database Records"):
+                st.dataframe(df.sort_values(by="analysis_date", ascending=False))
+        else:
+            st.info("No data found in the database yet. Run an analysis to see the dashboard!")
+            
+    except Exception as e:
+        st.error(f"Could not load dashboard: {e}")
+
+# Call the function at the very end of your script
+show_analytics()
