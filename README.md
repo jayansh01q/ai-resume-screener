@@ -2,15 +2,32 @@
 
 An automated Natural Language Processing (NLP) tool that screens PDF resumes against job descriptions to calculate a compatibility match score. 
 
+***
+
 ## Features
-* Extracts text from PDF documents.
-* Uses **TF-IDF (Term Frequency-Inverse Document Frequency)** to vectorize text data.
-* Calculates **Cosine Similarity** to generate a percentage match score between the candidate's skills and the job requirements.
-* Filters out common English stop words to ensure accurate keyword matching.
+
+* **AI-Powered Analysis**: Utilizes **TF-IDF** (Term Frequency-Inverse Document Frequency) and **Cosine Similarity** to generate precise percentage match scores between candidate skills and job requirements.
+* **Automated PDF Parsing**: Extracts and processes raw text data from PDF documents using `pypdf`.
+* **Interactive Web Interface**: A sleek, user-friendly frontend built with **Streamlit** for real-time resume uploading and job description analysis.
+* **Persistent Backend Storage**: Integrated **MySQL database** to log and track candidate match history, allowing for long-term data retention.
+* **Data Visualization Dashboard**: (Coming Soon) Interactive charts and trend analysis using **Plotly** to visualize recruitment metrics.
+* **Secure Access**: (Coming Soon) Role-based authentication to protect sensitive candidate data.
+
+***
 
 ## Tech Stack
-* **Language:** Python
-* **Libraries:** `pypdf` (v6.10.2, Document Parsing), `scikit-learn` (v1.8.0, Machine Learning / NLP), `fpdf2` (PDF Generation)
+
+* **Languages**: Python, SQL
+* **Frontend Framework**: Streamlit
+* **Database**: MySQL Server
+* **Key Libraries**:
+    * `pypdf` (v6.10.2): Robust PDF document parsing.
+    * `scikit-learn` (v1.8.0): Machine Learning and Natural Language Processing (NLP).
+    * `mysql-connector-python`: Official driver for Python to MySQL communication.
+    * `fpdf2`: Automated generation of mock PDF resumes for system testing.
+    * `plotly`: Dynamic data visualization and charting.
+
+***
 
 ## Database Setup (MySQL)
 This project uses MySQL to persist analysis results.
