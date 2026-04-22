@@ -2,3 +2,4 @@ pypdf==6.10.2
 scikit-learn==1.8.0
 fpdf2
 streamlit
+mysql-connector-python
