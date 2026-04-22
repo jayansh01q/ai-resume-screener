@@ -10,7 +10,7 @@ An automated Natural Language Processing (NLP) tool that screens PDF resumes aga
 * **Automated PDF Parsing**: Extracts and processes raw text data from PDF documents using `pypdf`.
 * **Interactive Web Interface**: A sleek, user-friendly frontend built with **Streamlit** for real-time resume uploading and job description analysis.
 * **Persistent Backend Storage**: Integrated **MySQL database** to log and track candidate match history, allowing for long-term data retention.
-* **Data Visualization Dashboard**: (Coming Soon) Interactive charts and trend analysis using **Plotly** to visualize recruitment metrics.
+* **Data Visualization Dashboard**: Interactive charts and trend analysis using **Plotly** to visualize recruitment metrics.
 * **Secure Access**: (Coming Soon) Role-based authentication to protect sensitive candidate data.
 
 ***
