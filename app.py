@@ -129,13 +129,14 @@ def show_analytics():
 
         if not df.empty:
             # 2. Create the Plotly Chart
-            fig = px.histogram(
+            fig = px.bar(
                 df, 
-                x="match_score", 
-                nbins=10,
-                title="Distribution of Candidate Match Scores",
-                labels={'match_score': 'Match Score (%)'},
-                color_discrete_sequence=['#00CC96']
+                x="candidate_name", 
+                y="match_score",
+                title="Candidate Comparison",
+                labels={'match_score': 'Match Score (%)', 'candidate_name': 'Candidate'},
+                color="match_score",
+                color_continuous_scale="Viridis" # This adds a cool color gradient!
             )
             
             # 3. Display stats and chart
