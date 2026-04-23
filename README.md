@@ -4,7 +4,7 @@
 
 ## 🚀 Live Demo
 
-**Try the application live here:** AI Resume Screener Pro
+**Try the application live here:** [AI Resume Screener Pro](https://j-ai-resume-screener.streamlit.app)
 *(Use access code: **admin123**)*
 
 ## ✨ Features
