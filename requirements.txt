@@ -1,7 +1,7 @@
-pypdf==6.10.2
-scikit-learn==1.8.0
-fpdf2
 streamlit
+python-dotenv
 mysql-connector-python
-plotly
+pypdf
+scikit-learn
 pandas
+plotly
