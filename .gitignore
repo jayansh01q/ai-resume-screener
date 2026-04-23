@@ -1,6 +1,5 @@
 # Credentials and Secrets
 .env
-*.pem
 *.cert
 *.key
 
