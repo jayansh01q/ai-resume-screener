@@ -1,83 +1,81 @@
-# AI Resume Screener 📄🤖
+AI Resume Screener Pro 📄🤖
+An automated Full-Stack Natural Language Processing (NLP) tool that screens PDF resumes against job descriptions, calculates compatibility scores, and logs analytics to a secure Cloud MySQL database.
 
-An automated Natural Language Processing (NLP) tool that screens PDF resumes against job descriptions to calculate a compatibility match score. 
+🚀 Live Demo
+Try the application live here: AI Resume Screener Pro
+(Use access code: admin123)
 
-***
+Features
+Cloud-Connected Architecture: Upgraded from local storage to a fully managed Aiven Cloud MySQL database for global, persistent data tracking.
 
-## Features
+Secure Authentication: Built-in login portal with session-state password protection to secure candidate data.
 
-* **AI-Powered Analysis**: Utilizes **TF-IDF** (Term Frequency-Inverse Document Frequency) and **Cosine Similarity** to generate precise percentage match scores between candidate skills and job requirements.
-* **Automated PDF Parsing**: Extracts and processes raw text data from PDF documents using `pypdf`.
-* **Interactive Web Interface**: A sleek, user-friendly frontend built with **Streamlit** for real-time resume uploading and job description analysis.
-* **Persistent Backend Storage**: Integrated **MySQL database** to log and track candidate match history, allowing for long-term data retention.
-* **Data Visualization Dashboard**: Interactive charts and trend analysis using **Plotly** to visualize recruitment metrics.
-* **Secure Access**: (Coming Soon) Role-based authentication to protect sensitive candidate data.
+AI-Powered Analysis: Utilizes TF-IDF and Cosine Similarity to generate precise percentage match scores between candidate skills and job requirements.
 
-***
+Automated PDF Parsing: Extracts and processes raw text data from PDF documents using pypdf.
 
-## Tech Stack
+Data Visualization Dashboard: Interactive charts and trend analysis using Plotly to visualize recruitment metrics pulled live from the cloud database.
 
-* **Languages**: Python, SQL
-* **Frontend Framework**: Streamlit
-* **Database**: MySQL Server
-* **Key Libraries**:
-    * `pypdf` (v6.10.2): Robust PDF document parsing.
-    * `scikit-learn` (v1.8.0): Machine Learning and Natural Language Processing (NLP).
-    * `mysql-connector-python`: Official driver for Python to MySQL communication.
-    * `fpdf2`: Automated generation of mock PDF resumes for system testing.
-    * `plotly`: Dynamic data visualization and charting.
+Environment Security: Implements python-dotenv for secure credential management, ensuring no hardcoded secrets in the repository.
 
-***
+Tech Stack
+Frontend & Hosting: Streamlit / Streamlit Community Cloud
 
-## Database Setup (MySQL)
-This project uses MySQL to persist analysis results.
-1. Install MySQL Server and Workbench.
-2. Create a database named `resume_db`.
-3. Run the SQL script located in `database/schema.sql` to create the required tables.
-4. Update the `db_config` dictionary in `app.py` with your local MySQL `root` password.
+Database & Hosting: MySQL Server / Aiven Cloud
 
-## Expected Demo Output
+Key Libraries:
 
-By running this project against our mock resumes, you can expect the following match scores:
-* **Software Engineer Resume:** `18.33%` (Highly relevant candidate)
-* **Head Chef Resume:** `3.35%` (Low match)
+pypdf (v6.10.2): Robust PDF document parsing.
 
-> **Note on TF-IDF Scoring:** In the context of Document Term Frequency-Inverse Document Frequency, a `15–20%` cosine similarity overlap is actually an exceptionally strong contextual match. Resumes are sparse texts while job descriptions are highly concentrated, so pure vector overlap naturally yields lower relative numbers compared to generic keyword counting algorithms.
+scikit-learn (v1.8.0): Machine Learning and Natural Language Processing (NLP).
 
-## How to Run Locally
+mysql-connector-python: Database communication (configured for pure TCP connections).
 
-1. Clone the repository:
-   ~~~bash
-   git clone https://github.com/jayansh01q/ai-resume-screener.git
-   ~~~
+plotly: Dynamic data visualization and charting.
 
-2. Navigate into the directory:
-   ~~~bash
-   cd ai-resume-screener
-   ~~~
+python-dotenv: Environment variable management.
 
-3. Install the required dependencies:
-   ~~~bash
-   pip install -r requirements.txt
-   ~~~
+Expected Match Scoring
+Note on TF-IDF Scoring: In the context of Document Term Frequency-Inverse Document Frequency, a 15–20% cosine similarity overlap is an exceptionally strong contextual match. Resumes are sparse texts while job descriptions are highly concentrated, so pure vector overlap naturally yields lower relative numbers compared to generic keyword counting algorithms.
 
-4. Generate the mock PDF resumes for testing:
-   ~~~bash
-   python make_pdfs.py
-   ~~~
+How to Run Locally
+If you wish to run this application on your own machine, follow these steps:
 
-* **Option A: Run the Web Interface (Recommended)**
-  Launch the interactive Streamlit web application:
-  ~~~bash
-  streamlit run app.py
-  ~~~
+1. Clone the repository
+```bash
+git clone https://github.com/jayansh01q/ai-resume-screener.git
+cd ai-resume-screener
+```
 
-* **Option B: Run the Command Line Version**
-  If you prefer the terminal, you can run the core script directly:
-  ~~~bash
-  python main.py
-  ~~~
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-## Development Methodology: AI-Assisted Architecture
-This project was built using an AI-assisted development workflow. I acted as the lead system architect, utilizing Large Language Models (like Claude 3.5 Sonnet and GPT-4o) to accelerate the prototyping and coding phase. My primary focus was on system design, library integration (`scikit-learn`, `pypdf`, `streamlit`), and tuning the mathematical thresholds to accurately reflect real-world ATS strictness.
-I utilized an AI-assisted architecture to bridge the gap between the NLP logic and data persistence. While the AI helped generate the `mysql-connector` boilerplates, I focused on designing the relational schema and ensuring the Python backend correctly sanitized inputs before committing to the MySQL instance.
+3. Database Setup (Bring Your Own DB)
+This project requires a MySQL database. You can use a local instance or a free cloud provider like Aiven.
+
+Create a database named defaultdb.
+
+Execute the CREATE TABLE script provided in database/schema.sql.
+
+If using a cloud database that requires SSL, download your provider's CA Certificate and save it in the root folder as ca.pem.
+
+4. Environment Variables
+Create a .env file in the root directory and add your database credentials:
+
+```plaintext
+MYSQL_HOST=your_database_host
+MYSQL_USER=your_database_user
+MYSQL_PASSWORD=your_secure_password
+MYSQL_DB=defaultdb
+MYSQL_PORT=your_port_number
+```
+
+5. Launch the Application
+```bash
+streamlit run app.py
+```
+
+Development Methodology: AI-Assisted Architecture
+This project was built using an AI-assisted development workflow. I acted as the lead system architect, utilizing Large Language Models to accelerate the prototyping and coding phase. My primary focus was on system design, bridging the gap between the NLP logic (scikit-learn) and data persistence (mysql-connector), securing the environment with .env files, and successfully deploying a production-ready cloud application.
