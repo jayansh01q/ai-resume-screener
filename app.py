@@ -71,13 +71,14 @@ def check_password():
 
 # --- DATABASE CONFIGURATION ---
 db_config = {
-    'host': os.getenv("MYSQL_HOST"),
-    'user': os.getenv("MYSQL_USER"),
-    'password': os.getenv("MYSQL_PASSWORD"),
-    'database': os.getenv("MYSQL_DB"),
-    'port': int(os.getenv("MYSQL_PORT", 16333)), # Port must be an integer
-    'ssl_ca': 'ca.pem',  # Path to the certificate you downloaded
-    'use_pure': True
+    'host': os.getenv("DB_HOST"),
+    'user': os.getenv("DB_USERNAME"),
+    'password': os.getenv("DB_PASSWORD"),
+    'database': os.getenv("DB_DATABASE"),
+    'port': int(os.getenv("DB_PORT", 4000)),
+    'use_pure': True,
+    'ssl_verify_cert': True,
+    'ssl_ca': 'ca.pem' 
 }
 
 def save_to_database(name, job, score):
