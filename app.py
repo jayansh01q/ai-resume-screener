@@ -124,8 +124,6 @@ if check_password():
     st.set_page_config(page_title="AI Resume Screener Pro", page_icon="🚀")
 
     st.title("🚀 AI Resume Screener + MySQL")
-    # TEMPORARY DEBUG LINE
-    st.write(f"Connected to: {os.getenv('DB_HOST')}")
     st.write("This version automatically saves all analysis results to your local database.")
 
     # 1. Inputs
